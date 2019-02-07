@@ -296,7 +296,7 @@ int     zbx_docker_api_detect()
 {
         zabbix_log(LOG_LEVEL_DEBUG, "In zbx_docker_api_detect()");
         // test root or docker permission
-        if (geteuid() != 0 && zbx_docker_perm() != 1 )
+        if (geteuid() != 0 )
         {
             zabbix_log(LOG_LEVEL_DEBUG, "Additional permission of Zabbix Agent are not detected - only basic docker metrics are available");
             socket_api = 0;
