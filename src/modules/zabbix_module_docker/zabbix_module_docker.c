@@ -294,21 +294,28 @@ int     zbx_docker_perm()
  ******************************************************************************/
 int     zbx_docker_api_detect()
 {
-        zabbix_log(LOG_LEVEL_DEBUG, "In zbx_docker_api_detect() - Mcna");
+        zabbix_log(LOG_LEVEL_DEBUG, "In zbx_docker_api_detect()");
         // test root or docker permission
-        // test Docker's socket connection
-		const char *echo = zbx_module_docker_socket_query("GET /_ping HTTP/1.0\r\n\n", 0);
-		if (strcmp(echo, "OK") == 0)
-		{
-			zabbix_log(LOG_LEVEL_DEBUG, "Docker's socket works - extended docker metrics are available");
-			socket_api = 1;
-			return socket_api;
-		} else {
-			zabbix_log(LOG_LEVEL_DEBUG, "Docker's socket doesn't work - only basic docker metrics are available");
-			socket_api = 0;
-			return socket_api;
-		}
-		free((void*) echo);
+        if (geteuid() != 0)
+        {
+            zabbix_log(LOG_LEVEL_DEBUG, "Additional permission of Zabbix Agent are not detected - only basic docker metrics are available");
+            socket_api = 0;
+            return socket_api;
+        } else {
+            // test Docker's socket connection
+            const char *echo = zbx_module_docker_socket_query("GET /_ping HTTP/1.0\r\n\n", 0);
+            if (strcmp(echo, "OK") == 0)
+            {
+                zabbix_log(LOG_LEVEL_DEBUG, "Docker's socket works - extended docker metrics are available");
+                socket_api = 1;
+                return socket_api;
+            } else {
+                zabbix_log(LOG_LEVEL_DEBUG, "Docker's socket doesn't work - only basic docker metrics are available");
+                socket_api = 0;
+                return socket_api;
+            }
+            free((void*) echo);
+        }
 }
 
 /******************************************************************************
